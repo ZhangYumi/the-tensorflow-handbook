@@ -21,12 +21,12 @@
 * 附：本例完整代码如下：
 
 ```
-1.  import tensorflow as tf
-2.  
-3.  a = tf.constant("Hello,world!")
-4.  sess = tf.Session()
-5.  print(sess.run(a))
-6.  sess.close()
+import tensorflow as tf
+
+a = tf.constant("Hello,world!")
+sess = tf.Session()
+print(sess.run(a))
+sess.close()
 ```
 
 
