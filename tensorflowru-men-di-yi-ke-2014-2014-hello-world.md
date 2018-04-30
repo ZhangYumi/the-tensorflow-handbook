@@ -18,14 +18,5 @@
 
 关于会话，我们也在后文作详细讲解。至此，我们就完成了我们的第一个Tensorflow程序————Hello，world！
 
-附：本例完整代码如下：
-```
-import tensorflow as tf
-
-a = tf.constant("Hello,world!")
-sess = tf.Session()
-print(sess.run(a))
-sess.close()
-
-```
+* 附：本例完整代码如下：
 
