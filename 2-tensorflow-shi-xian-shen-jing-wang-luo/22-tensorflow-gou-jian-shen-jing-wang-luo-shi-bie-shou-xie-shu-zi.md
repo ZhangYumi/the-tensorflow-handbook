@@ -29,6 +29,7 @@
 **train_step =  tf.train.GradientDescentOptimizer(0.001).minimize(loss)**是指以0.001为学习率进行梯度下降，已达到loss局部最小化值。tensorflow的梯度下降函数会自动进行反向传播更新w和b的值，这一点无需我们自己去实现。
 
 * ###创建会话，训练神经网络，输入验证集，计算准确率。
+
 ![](/assets/微信截图_20180510011041.png)
 
 
@@ -48,4 +49,27 @@
    
    **tf.reduce_mean(A)**:该函数求A中元素的平均值。
   
-5. 上面我们介绍了怎么计算预测的准确度。接下来，我们用for循环迭代10个batch,
+5. 上面我们介绍了怎么计算预测的准确度。接下来，我们用for循环迭代10个batch,每个batch为100个从测试集中随机抽取的测试样本。方法与训练集batch一样，此处不再赘述。然后我们用训练好的神经网络来识别每个batch中的数字图片，并计算预测准确度。可以看出，我们训练的神经网络在大部分测试集batch上都达到了90%以上的识别率。
+
+![](/assets/微信截图_20180510021011.png)
+
+* ###总结：
+本文利用tensorflow实现了最简单的神经网络，实现手写数字识别。当然，本例没有做太多神经网络优化，比如损失函数loss过于粗糙，训练迭代次数等都会影响到神经网络的预测效果。在后续的学习中，我们会讲解一些神经网络的优化方法。
+
+* ###附本例完整代码：
+```
+import tensorflow as tf
+from tensorflow.examples.tutorials.mnist import input_data
+mnist = input_data.read_data_sets(r"E:\\TensorFlow_Study\\MNIST_data\\", one_hot=True)
+
+x = tf.placeholder(tf.float32,[None,784])
+w = tf.Variable(tf.zeros([784,10]))
+b = tf.Variable(tf.zeros([10]))
+y = tf.nn.softmax(tf.matmul(x,w)+b)
+y_ = tf.placeholder(tf.float32,[None,10])
+
+loss = tf.reduce_sum(tf.square(y-y_))
+train_step = tf.train.GradientDescentOptimizer(0.001).minimize(loss)
+
+```
+
