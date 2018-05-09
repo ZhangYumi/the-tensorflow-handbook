@@ -57,6 +57,7 @@
 本文利用tensorflow实现了最简单的神经网络，实现手写数字识别。当然，本例没有做太多神经网络优化，比如损失函数loss过于粗糙，训练迭代次数等都会影响到神经网络的预测效果。在后续的学习中，我们会讲解一些神经网络的优化方法。
 
 * ###附本例完整代码：
+
 ```
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
@@ -70,6 +71,22 @@ y_ = tf.placeholder(tf.float32,[None,10])
 
 loss = tf.reduce_sum(tf.square(y-y_))
 train_step = tf.train.GradientDescentOptimizer(0.001).minimize(loss)
+
+init=tf.global_variables_initializer()
+with tf.Session() as sess:
+    sess.run(init)
+    for i in range(2000):
+        batch_xtrain,batch_ytrain=mnist.train.next_batch(100)
+        sess.run(train_step,feed_dict={x:batch_xtrain,y_:batch_ytrain})
+        if i%200==0:
+            print("step_%d loss: %f"%(i,sess.run(loss,feed_dict={x:batch_xtrain,y_:batch_ytrain})))
+            
+    correct_prediction=tf.equal(tf.argmax(y,1),tf.argmax(y_,1))
+    accuracy=tf.reduce_mean(tf.cast(correct_prediction,"float"))
+    
+    for i in range(10):
+        batch_xtest, batch_ytest = mnist.test.next_batch(100)
+        print("batch_%d accuracy: %.2f"%(i,sess.run(accuracy, feed_dict={x: batch_xtest, y_: batch_ytest})))
 
 ```
 
