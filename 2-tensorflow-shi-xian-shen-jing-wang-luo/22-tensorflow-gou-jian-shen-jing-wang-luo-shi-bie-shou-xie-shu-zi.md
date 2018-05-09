@@ -33,23 +33,27 @@
 ![](/assets/微信截图_20180510011041.png)
 
 
-1. 通过代码**init = tf.global_variables_initializer()**初始化所有变量，并调用**sess.run(init)**计算这些变量，这在前面关于会话的章节中有所概述，此处我们就不多说了。
+_1. _通过代码**init = tf.global_variables_initializer()**初始化所有变量，并调用**sess.run(init)**计算这些变量，这在前面关于会话的章节中有所概述，此处我们就不多说了。
 
-2. **mnist.train.next_batch(N)**:该函数从训练集中返回一个batch列表，包含两个batch：一个图片batch，包含N张图片；一个标签batch，包含N个数字标签。也就是说，将N张图片作为一个数据块，返回给batch\_xtrain；将N个标签向量作为一个数据块，返回给batch\_ytrain。所以batch\_xtrain为N\*784矩阵，batch\_ytrain为N\*10矩阵。
 
-3. **sess.run(train_step,feed_dict={x:batch_xtrain,y_:batch_ytrain})**:该行代码表示将batch_xtrain,batch_ytrain作为输入数据训练神经网络。我们用for循环迭代训练2000次，每200次打印输出一次损失函数loss的值，观察loss的变化趋势。可以看到，我们的loss从初试的89降到了15（此处可以思考为什么loss不趋近于0）。
+_2. _**mnist.train.next_batch(N)**:该函数从训练集中返回一个batch列表，包含两个batch：一个图片batch，包含N张图片；一个标签batch，包含N个数字标签。也就是说，将N张图片作为一个数据块，返回给batch\_xtrain；将N个标签向量作为一个数据块，返回给batch\_ytrain。所以batch\_xtrain为N\*784矩阵，batch\_ytrain为N\*10矩阵。
 
-    ![](/assets/微信截图_20180510013756.png)
 
-4. **tf.equal(A,B)**：对比两个矩阵或向量A和B的对应元素，元素相等就返回True，元素不等就返回False。比如A = [1,2,3,4], B = [1,2,3,5]。那么**tf.equal(A,B)**将返回[True,True,True,False]。
+_3. _**sess.run(train_step,feed_dict={x:batch_xtrain,y_:batch_ytrain})**:该行代码表示将batch_xtrain,batch_ytrain作为输入数据训练神经网络。我们用for循环迭代训练2000次，每200次打印输出一次损失函数loss的值，观察loss的变化趋势。可以看到，我们的loss从初试的89降到了15（此处可以思考为什么loss不趋近于0）。
+
+![](/assets/微信截图_20180510013756.png)
+
+
+_4. _**tf.equal(A,B)**：对比两个矩阵或向量A和B的对应元素，元素相等就返回True，元素不等就返回False。比如A = [1,2,3,4], B = [1,2,3,5]。那么**tf.equal(A,B)**将返回[True,True,True,False]。
 
    **tf.argmax(vector,1)**：返回vector中的最大值索引号。若vector是一个向量，就返回最大值索引；若vector是一个矩阵，就返回每一个维度对应矩阵行的最大值索引。前面我们说过，当识别准确时，y与y\_的最大值索引号理论上相等，索引号相等则**tf.equal(tf.argmax(y,1),tf.argmax(y_,1))**返回True组成的数组。也就是说**correct\_prediction = tf.equal(tf.argmax(y,1),tf.argmax(y_,1))**返回的数组correct\_prediction中，True的个数越多，识别准确度越高。
    
    **tf.cast(A,dtype)**:该函数是将矩阵A的元素进行数据类型转换。此处我们将correct\_prediction中的元素由bool型转换成float型。True变成1.0，False变成0。转换成数值型，便于我们计算精确度。
    
    **tf.reduce_mean(A)**:该函数求A中元素的平均值。
-  
-5. 上面我们介绍了怎么计算预测的准确度。接下来，我们用for循环迭代10个batch,每个batch为100个从测试集中随机抽取的测试样本。方法与训练集batch一样，此处不再赘述。然后我们用训练好的神经网络来识别每个batch中的数字图片，并计算预测准确度。可以看出，我们训练的神经网络在大部分测试集batch上都达到了90%以上的识别率。
+
+    
+_5. _上面我们介绍了怎么计算预测的准确度。接下来，我们用for循环迭代10个batch,每个batch为100个从测试集中随机抽取的测试样本。方法与训练集batch一样，此处不再赘述。然后我们用训练好的神经网络来识别每个batch中的数字图片，并计算预测准确度。可以看出，我们训练的神经网络在大部分测试集batch上都达到了90%以上的识别率。
 
 ![](/assets/微信截图_20180510021011.png)
 
