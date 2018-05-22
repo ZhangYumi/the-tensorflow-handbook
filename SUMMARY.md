@@ -9,5 +9,6 @@
   * [简单神经网络介绍](jian-dan-shen-jing-wang-luo-jie-shao.md)
   * [Tensorflow构建神经网络识别手写数字](2-tensorflow-shi-xian-shen-jing-wang-luo/22-tensorflow-gou-jian-shen-jing-wang-luo-shi-bie-shou-xie-shu-zi.md)
 * [Tensorflow实现卷积神经网络](tensorflowshi-xian-juan-ji-shen-jing-wang-luo.md)
-  * 卷积神经网络介绍
+  * [卷积神经网络介绍](tensorflowshi-xian-juan-ji-shen-jing-wang-luo/juan-ji-shen-jing-wang-luo-jie-shao.md)
+  * [Tensorflow构建经典卷积神经网络LetNe-5](tensorflowgou-jian-jing-dian-juan-ji-shen-jing-wang-luo-letne-5.md)
 
