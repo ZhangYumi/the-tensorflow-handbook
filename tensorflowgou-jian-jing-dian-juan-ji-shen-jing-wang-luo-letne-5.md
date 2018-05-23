@@ -183,4 +183,143 @@ if __name__=="__main__":
 
 可以看出，损失函数loss在神经网络训练过程中不断减小。在大多数测试集batch上LeNet-5都达到了0.96以上的准确率，甚至0.99，相比传统神经网络的表现，卷积神经网络表现更好，准确率有了显著提高。
 
+### 附：本例完整代码：
+
+
+```
+#-*- coding:utf-8 -*-
+import tensorflow as tf
+from tensorflow.examples.tutorials.mnist import input_data
+mnist = input_data.read_data_sets(r"E:\\TensorFlow_Study\\MNIST_data\\", one_hot=True)
+
+#*********************定义参数****************************#
+IMAGE_SIZE = 28                     #输入图片大小，784 = 28x28
+NUM_CHANNELS = 1                    #输入图片通道数，灰度图像，单通道
+CONV1_SIZE = 5                      #过滤器1（或者说卷积核1）的大小，5x5
+CONV1_KERNEL_NUM = 32               #过滤器1（或者说卷积核1）的深度，5x5x32
+CONV2_SIZE = 5                      #过滤器2（或者说卷积核2）的大小，5x5
+CONV2_KERNEL_NUM = 64               #过滤器2（或者说卷积核2）的深度，5x5x64
+FC_SIZE = 1024                      #全连接层大小
+OUTPUT_NODE = 10                    #输出节点数
+#*********************************************************#
+
+def get_weight(shape):
+    """
+    设置并返回权重参数W
+    :param shape: 权重参数矩阵形状
+    :return W: 权重参数
+    """
+    W = tf.Variable(tf.truncated_normal(shape,stddev=0.1))
+    return W
+
+def get_bias(shape,value=0.1,):
+    """
+    设置并返回偏移量bias
+    :param shape: 参数矩阵形状
+    :param value: 参数初始化值
+    :return b: 偏移量
+    """
+    b = tf.Variable(tf.constant(value, shape=shape))
+    return b
+
+def conv2d(x,W):
+    """
+    重定义卷积计算函数
+    :param x: 输入矩阵
+    :param W: 权重参数矩阵
+    :return conv2d(x,W): 卷积结果
+    """
+    return tf.nn.conv2d(x,W,strides=[1,1,1,1],padding="SAME")
+
+def max_pool_2x2(x):
+    """
+    重定义2阶最大池化
+    :param x: 输入矩阵
+    :return: 池化结果
+    """
+    return tf.nn.max_pool(x,ksize=[1,2,2,1],strides=[1,2,2,1],padding="SAME")
+
+def forward(x,train):
+    """
+    LetNe-5经典卷积神经网络前向传播
+    :param x: 输入矩阵
+    :param train: 是否进行dropout防过拟合优化
+    :return y: 输出结果
+    """
+    #*************第一层卷积层**************#
+    # 输入为x = 28x28x1,滤波器filter为5x5x32,卷积后输出为28x28x32
+    conv1_w = get_weight([CONV1_SIZE,CONV1_SIZE,NUM_CHANNELS,CONV1_KERNEL_NUM])    #patch 5x5, input size 1, output size 32
+    conv1_b = get_bias([CONV1_KERNEL_NUM])
+    conv1 = conv2d(x,conv1_w)
+    relu1 = tf.nn.relu(tf.nn.bias_add(conv1,conv1_b))  #output size 28x28x32
+
+    #*************第一层池化层***************#
+    # 输入为28x28x32，输出为14x14x32
+    pool1 = max_pool_2x2(relu1) #output size 14x14x32
+
+    #*************第二层卷积层***************#
+    # 输入为上面池化层输出14x14x32，滤波器filter为5x5x64，卷积后输出为14x14x64
+    conv2_w = get_weight([CONV2_SIZE, CONV2_SIZE, CONV1_KERNEL_NUM, CONV2_KERNEL_NUM]) #patch 5x5, input size 32, output size 64
+    conv2_b = get_bias([CONV2_KERNEL_NUM])
+    conv2 = conv2d(pool1, conv2_w)
+    relu2 = tf.nn.relu(tf.nn.bias_add(conv2, conv2_b))  #output size 14x14x64
+
+    #*************第二层池化层***************#
+    # 输入为14x14x64，输出为7x7x64
+    pool2 = max_pool_2x2(relu2)  #output size 7x7x64
+    pool2_reshape = tf.reshape(pool2,[-1,7*7*64])    #矩阵变换
+
+    #*************第一层全连接层**************#
+    fc1_w = get_weight([7*7*64,FC_SIZE])
+    fc1_b = get_bias([FC_SIZE])
+    fc1 = tf.nn.relu(tf.matmul(pool2_reshape,fc1_w)+fc1_b)
+    if train:
+        fc1 = tf.nn.dropout(fc1,0.5)    #按1-0.5的概率置0，其余的未置0的乘以1/0.5,保证总体期望值不变，防止过拟合。
+
+    #*************第二层全连接层***************#
+    fc2_w = get_weight([FC_SIZE, OUTPUT_NODE])
+    fc2_b = get_bias([OUTPUT_NODE])
+    y = tf.nn.softmax(tf.matmul(fc1, fc2_w) + fc2_b)
+
+    return y
+
+if __name__=="__main__":
+    with tf.device('/gpu:0'):
+        xs = tf.placeholder(tf.float32, [None, 784])  # 28x28
+        ys = tf.placeholder(tf.float32, [None, 10])
+        keep_prob = tf.placeholder(tf.float32)
+        x_image = tf.reshape(xs, [-1, 28, 28, 1])
+
+        prediction = forward(x_image,True)
+        cross_entropy = tf.reduce_mean(-tf.reduce_sum(ys * tf.log(prediction),reduction_indices=[1]))       # loss
+        loss = tf.reduce_mean(tf.square(ys - prediction))
+        train_step = tf.train.AdamOptimizer(0.0001).minimize(cross_entropy)
+
+        #定义会话，设置GPU
+        config = tf.ConfigProto(allow_soft_placement = True)
+        sess = tf.Session(config=config)
+        init = tf.global_variables_initializer()
+        sess.run(init)
+
+        #用训练数据集训练神经网络
+        for i in range(1000):
+            batch_xs, batch_ys = mnist.train.next_batch(100)
+            sess.run(train_step, feed_dict={xs: batch_xs, ys: batch_ys, keep_prob: 0.5})
+            if i % 100 == 0:
+                print("step_%d's loss: %f" % (i, sess.run(cross_entropy, feed_dict={xs: batch_xs, ys: batch_ys})))
+
+        #计算预测准确度
+        correct_prediction = tf.equal(tf.argmax(ys, 1), tf.argmax(prediction, 1))
+        accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
+
+        #用测试数据集测试训练好的神经网络
+        for i in range(10):
+            batch_xtest, batch_ytest = mnist.test.next_batch(100)
+            print("batch_%d's accuracy: %.2f"%(i,sess.run(accuracy,feed_dict={xs:batch_xtest,ys:batch_ytest,keep_prob:0.5})))
+
+        sess.close()
+```
+
+
+
 
