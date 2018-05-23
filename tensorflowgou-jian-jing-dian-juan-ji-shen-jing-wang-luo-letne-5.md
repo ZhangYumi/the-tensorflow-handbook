@@ -14,13 +14,32 @@
 ![](/assets/TIM截图20180523154109.png)
 
 ### 3.初始化权重W
+
 ![](/assets/TIM截图20180523160520.png)
 
 我们用tf.truncated_normal()函数进行初始化权重W。tf.truncated_normal()返回一个随机数矩阵，这些随机数服从一个截断的正态分布。tf.truncated_normal()的定义为：
 
 ```
-def truncated_normal(shape,mean=0.0,stddev=1.0,dtype=tf.float32,seed=None,name=None):                     
+def truncated_normal(shape,
+                     mean=0.0,
+                     stddev=1.0,
+                     dtype=tf.float32,
+                     seed=None,
+                     name=None):                     
 ```
 shape是返回的随机数矩阵的形状，mean是均值，stddev是标准差，dtype是数据类型，seed是随机种子，name是返回矩阵的名称。这里我们将shape作为初始化参数，标准差stddev设置为0.1,标准差设置过大导致权重参数分布范围过大，更新不稳定，容易导致梯度爆炸。
 
 ### 4.初始化偏移量b
+
+![](/assets/TIM截图20180523162738.png)
+
+get_bias()我们定义两个参数，矩阵形状shape与参数初始化填充值value，默认为0.1。比如get_bias([3,2])将返回一个tensorflow变量，会话中运行该变量得到矩阵：
+
+```
+[[0.1,0.1],
+ [0.1,0.1],
+ [0.1,0.1]
+]
+```
+
+### 5.
