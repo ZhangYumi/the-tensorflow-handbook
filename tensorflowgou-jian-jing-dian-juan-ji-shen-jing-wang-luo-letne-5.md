@@ -132,4 +132,55 @@ def forward(x,train):
     return y
 
 ```
+其中，train用于控制在第一次全连接层后是否进行dropout处理。前向传播最后输出y为[None,10]的矩阵变量。None取决于输入的batch大小，10是每一张手写数字的预测结果向量长度。
+
+### 8.主函数
+前面的过程，我们已经对LeNet-5前向传播过程进行了封装，在主函数中，我们只需要定义好输入输出参数，调用前向传播函数，用训练集训练网络，然后用测试集测试训练好的网络。这一部分与我们前面的《Tensorflow构建神经网络识别手写数字》内容大同小异，简单地说，卷积神经网络与传统神经网络的主要差异在于前向传播中的结构差异。因此主函数的实现代码请参考前面讲解，包括损失函数定义、准确度计算等。但值得一提的是，由于LeNet-5相对于之前的传统神经网络层数更多，因此此处我们可以设置GPU计算。代码如下：
+
+
+```
+if __name__=="__main__":
+    with tf.device('/gpu:0'):
+        xs = tf.placeholder(tf.float32, [None, 784])  # 28x28
+        ys = tf.placeholder(tf.float32, [None, 10])
+        keep_prob = tf.placeholder(tf.float32)
+        x_image = tf.reshape(xs, [-1, 28, 28, 1])
+
+        prediction = forward(x_image,True)
+        cross_entropy = tf.reduce_mean(-tf.reduce_sum(ys * tf.log(prediction),reduction_indices=[1]))       # loss
+        loss = tf.reduce_mean(tf.square(ys - prediction))
+        train_step = tf.train.AdamOptimizer(0.0001).minimize(cross_entropy)
+
+        #定义会话，设置GPU
+        config = tf.ConfigProto(allow_soft_placement = True)
+        sess = tf.Session(config=config)
+        init = tf.global_variables_initializer()
+        sess.run(init)
+
+        #用训练数据集训练神经网络
+        for i in range(1000):
+            batch_xs, batch_ys = mnist.train.next_batch(100)
+            sess.run(train_step, feed_dict={xs: batch_xs, ys: batch_ys, keep_prob: 0.5})
+            if i % 100 == 0:
+                print("step_%d's loss: %f" % (i, sess.run(cross_entropy, feed_dict={xs: batch_xs, ys: batch_ys})))
+
+        #计算预测准确度
+        correct_prediction = tf.equal(tf.argmax(ys, 1), tf.argmax(prediction, 1))
+        accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
+
+        #用测试数据集测试训练好的神经网络
+        for i in range(10):
+            batch_xtest, batch_ytest = mnist.test.next_batch(100)
+            print("batch_%d's accuracy: %.2f"%(i,sess.run(accuracy,feed_dict={xs:batch_xtest,ys:batch_ytest,keep_prob:0.5})))
+
+        sess.close()
+```
+至此，一个LeNet-5模型我们便构建好了。接下来，我们运行一下该模型，观察损失函数loss的在训练过程中的变化以及训练好的LeNet-5模型在10个测试集batch上的预测表现。
+
+![](/assets/TIM截图20180523173031.png)
+
+![](/assets/TIM截图20180523173241.png)
+
+可以看出，损失函数loss在神经网络训练过程中不断减小。在大多数测试集batch上LeNet-5都达到了0.96以上的准确率，甚至0.99，相比传统神经网络的表现，卷积神经网络表现更好，准确率有了显著提高。
+
 
