@@ -19,12 +19,7 @@
 我们用tf.truncated_normal()函数进行初始化权重W。tf.truncated_normal()返回一个随机数矩阵，这些随机数服从一个截断的正态分布。tf.truncated_normal()的定义为：
 
 ```
-def truncated_normal(shape,
-                     mean=0.0,
-                     stddev=1.0,
-                     dtype=tf.float32,
-                     seed=None,
-                     name=None):                     
+def truncated_normal(shape,mean=0.0,stddev=1.0,dtype=tf.float32,seed=None,name=None):                     
 ```
 shape是返回的随机数矩阵的形状，mean是均值，stddev是标准差，dtype是数据类型，seed是随机种子，name是返回矩阵的名称。这里我们将shape作为初始化参数，标准差stddev设置为0.1,标准差设置过大导致权重参数分布范围过大，更新不稳定，容易导致梯度爆炸。
 
